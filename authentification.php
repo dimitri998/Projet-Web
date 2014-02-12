@@ -1,51 +1,3 @@
-<?php
-	
-	require('connect.php');
-
-	$dsn="mysql:dbname=".BASE.";host=".SERVER;
-	try{
-		$connexion=new PDO($dsn, USER, PASSWD);
-	}
-	catch(PDOException $e){
-		printf("Echec de la connexion : %s\n", $e->getMessage());
-		exit();
-	}
-	//$sql="SELECT * from USER"
-	$errorMessage='';
-	
-	if(!empty($_POST))
-	{
-		//Les identifiants sont transmis ?
-		if(!empty($_POST['login']) && !empty($_POST['password']))
-		{
-			$stmt=$connexion->prepare("SELECT * from utilisateur where login=:log and password=:pswd");
-			$login = $_POST['login'];
-			$pswd = $_POST['password'];
-			$stmt->bindParam(':log', $login);
-			$stmt->bindParam(':pswd', md5($pswd));
-	
-			$stmt->execute();
-	
-			if($stmt->rowCount() != 1){
-				$errorMessage="Pb connexion";
-			}
-			else //Tout va bien
-			{
-				//On ouvre la session
-				session_start();
-				//On enregistre le login en session
-				$_SESSION['login']=$_POST['login'];
-				//On redirige vers le fichier suite.php
-				header('Location:connecte.php');
-			}
-		}
-	else
-	{
-		$errorMessage='Veuillez inscrire vos identifiant svp !';
-	}
-	}
-?>
-
 <!DOCTYPE HTML>
 
 <html lang="fr">
@@ -56,11 +8,6 @@
 		<link href="style.css" rel="stylesheet" type="text/css">
 	</head>
 	<body>
-		<?php
-			if(!empty($errorMessage)){
-				echo $errorMessage;
-			}
-		?>
 		<div class="container">
 			<div class="row">
 				<nav class="navbar navbar-inner">
@@ -81,6 +28,58 @@
 						</form>
 					</ul>
 				</nav>
+
+				<center style="color:red;font-size:16px;">
+
+				<?php				
+					
+				require('connect.php');
+
+				$dsn="mysql:dbname=".BASE.";host=".SERVER;
+				try{
+				$connexion=new PDO($dsn, USER, PASSWD);
+				}
+				catch(PDOException $e){
+				printf("Echec de la connexion : %s\n", $e->getMessage());
+				exit();
+				}
+
+				$errorMessage='';
+						
+                		if(!empty($_POST)){//Les identifiants sont transmis ?
+
+				if(!empty($_POST['login']) && !empty($_POST['password'])){
+
+				$stmt=$connexion->prepare("SELECT * from utilisateur where login=:log and password=:pswd");
+				$login = $_POST['login'];
+				$pswd = explode('.', md5($_POST['password']));
+				$pswd = end($pswd);
+				$stmt->bindParam(':log', $login);
+				$stmt->bindParam(':pswd', $pswd);
+				$stmt->execute();
+				if($stmt->rowCount() != 1){
+				$errorMessage="Pb connexion";
+				}
+				else{ //Tout va bien
+				//On ouvre la session
+				session_start();
+				$_SESSION['login']=$_POST['login'];//On enregistre le login en session
+				//On redirige vers le fichier suite.php
+				header('Location:connecte.php');
+				}
+				}
+				else{
+				$errorMessage='Veuillez inscrire vos identifiant svp !';
+				}
+				}
+
+				if(!empty($errorMessage)){
+					echo $errorMessage;
+				}
+				?>
+
+				</center>
+
 				<h1 class="h1" class="col-md-12">Bienvenue sur l'application de gestion de planning</h1>
 				<p>Cette application vous permet de gérer votre planning d'activités</p>
 				<p>Une activité ne vous interesse plus ? Supprimez la de votre emploi du temps !</p>

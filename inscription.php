@@ -29,8 +29,40 @@
 						</form>
 					</ul>
 				</nav>
+				<center style="color:red;font-size:16px;">
+				<?php 
+				   require_once('connect.php');
+				   
+				   $dsn="mysql:dbname=".BASE.";host=".SERVER;
+				   $connexion=new PDO($dsn, USER, PASSWD);
+				   
+				   
+				   if(!empty($_POST['login']) && !empty($_POST['pswd'])){
+				   $stmt=$connexion->prepare("INSERT INTO utilisateur VALUES(:log, :pswd)");
+				   $stmt2=$connexion->prepare("SELECT * FROM utilisateur where login=:log");
 
-				<fieldset>
+                                 $pwd = explode('.', md5($_POST['pswd']));
+				 $pwd = end($pwd);
+
+				 $stmt->bindParam(':log'  , $_POST['login']);
+				 $stmt->bindParam(':pswd' , $pwd );
+				
+				 $stmt2->bindParam(':log', $_POST['login']);
+				 $stmt2->execute();
+				 $row=$stmt2->fetch();
+				 if($stmt2->rowCount() != 1){
+				  if($row[0] != $_POST['login']){
+				  $stmt->execute();
+				  echo "user enregistré";
+				  }
+				 }
+				 else{
+			           echo "User deja utilise";
+				 }
+
+				}
+				?>
+				</center>
 						<div class="row">
 							<div class="col-md-4">
 								<div class="divgris">
@@ -89,37 +121,9 @@
 									<input class="form-control" type="password" name="pswd" placeholder="Entrez votre password" />
 								</div>
 								<input class="btn btn-default" type="submit" name="Envoyer" value="Envoyer" />
-								<?php 
-									require('connect.php');
-													
-									$dsn="mysql:dbname=".BASE.";host=".SERVER;
-									$connexion=new PDO($dsn, USER, PASSWD);
-													
-													
-									if(!empty($_POST['login']) && !empty($_POST['pswd'])){
-										$stmt=$connexion->prepare("INSERT INTO utilisateur VALUES(:log, :pswd)");
-										$stmt2=$connexion->prepare("SELECT * FROM utilisateur where login=:log");
-										$login=$_POST['login'];
-										$password=$_POST['pswd'];
-														
-										$stmt->bindParam(':log', $login);
-										$stmt->bindParam(':pswd', md5($password));
-														
-										$stmt2->bindParam(':log', $login);
-										$stmt2->execute();
-										$row=$stmt2->fetch();
-										if($stmt2->rowCount() != 1){
-											if($row[0] != $_POST['login']){
-												$stmt->execute();
-												echo "user enregistré";
-											}
-										}
-										else{
-											echo "User deja utilise";
-										}
-
-									}
-								?>
 							</form>
-						</div>					
-				</fieldset>
+						</div>	
+			</div>
+	</div>
+	</body>
+</html>

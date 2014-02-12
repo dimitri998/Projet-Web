@@ -1,8 +1,8 @@
 <?php
 
-define('USER' , "ledouarin");
-define('PASSWD' , "ledouarin");
-define('SERVER' , "info2");
+define('USER' , "dimitri");
+define('PASSWD' , "mdp");
+define('SERVER' , "localhost");
 define('BASE' , "DBledouarin")
 
 ?>
